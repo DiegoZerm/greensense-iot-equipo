@@ -1,0 +1,36 @@
+@if (sesion.usuario(); as usuario) {
+  <header class="barra">
+    <h1>GreenSense IoT</h1>
+    <nav>
+      <a routerLink="/" routerLinkActive="activo" [routerLinkActiveOptions]="{ exact: true }"
+        >Panel</a
+      >
+      <a routerLink="/alertas" routerLinkActive="activo">
+        Alertas
+        @if (alertas.criticasActivas(); as criticas) {
+          <span class="contador" [attr.aria-label]="criticas + ' críticas'">{{ criticas }}</span>
+        }
+      </a>
+      @if (sesion.puede('consultar_historial')) {
+        <a routerLink="/historial" routerLinkActive="activo">Historial</a>
+      }
+      @if (configura()) {
+        <a routerLink="/configuracion" routerLinkActive="activo">Configuración</a>
+      }
+      @if (sesion.puede('consultar_bitacora')) {
+        <a routerLink="/bitacora" routerLinkActive="activo">Bitácora</a>
+      }
+    </nav>
+    <gs-boton-notificaciones />
+    <div class="usuario">
+      <a routerLink="/cuenta" class="nombre" [title]="usuario.correo">
+        {{ usuario.nombre }} <small>{{ rol() }}</small>
+      </a>
+      <button type="button" (click)="salir()">Salir</button>
+    </div>
+  </header>
+}
+
+<main>
+  <router-outlet />
+</main>
