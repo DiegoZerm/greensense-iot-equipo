@@ -1,0 +1,19 @@
+# Servicio de usuario para que el servidor arranque al iniciar sesión.
+# Instalar:
+#   cp infra/systemd/greensense-servidor.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now greensense-servidor
+# Docker también debe arrancar solo: sudo systemctl enable docker
+# Ver la salida: journalctl --user -u greensense-servidor -f
+[Unit]
+Description=Servidor de GreenSense IoT
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/Work/greensense-iot/servidor
+ExecStart=%h/Work/greensense-iot/servidor/.venv/bin/uvicorn --factory greensense.composicion:crear_aplicacion --host 0.0.0.0 --port 8000
+# Si la base de datos todavía no está lista al arrancar, falla y se reintenta.
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target

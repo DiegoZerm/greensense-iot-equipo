@@ -1,0 +1,9 @@
+# El servidor lee todos los temas de GreenSense y es el único que envía comandos.
+user servidor
+topic read greensense/#
+topic write greensense/+/+/comandos
+
+# Cada nodo usa como usuario su identificador (%u) y solo puede publicar en sus temas.
+pattern write greensense/+/%u/lecturas
+pattern write greensense/+/%u/estado
+pattern read greensense/+/%u/comandos
