@@ -1,0 +1,58 @@
+<div class="encabezado">
+  <h2>Estado actual</h2>
+  <span class="en-vivo" [class.activo]="servicio.enVivo()">
+    {{ servicio.enVivo() ? 'En vivo' : 'Reconectando…' }}
+  </span>
+</div>
+
+@if (servicio.error(); as error) {
+  <p class="aviso" role="alert">{{ error }}</p>
+}
+
+<div class="nodos">
+  @for (estado of servicio.estados(); track estado.nodo.id) {
+    <article class="nodo" [attr.data-nodo]="estado.nodo.id">
+      <header>
+        <h3>{{ estado.nodo.nombre }}</h3>
+        <span class="estado" [class]="estado.nodo.estado">{{ estado.nodo.estado }}</span>
+      </header>
+
+      <dl class="variables">
+        @for (variable of variables; track variable.clave) {
+          <div
+            class="variable"
+            [class]="severidad(estado, variable.clave)"
+            [attr.data-variable]="variable.clave"
+          >
+            <dt>{{ variable.nombre }}</dt>
+            <dd>
+              @if (sinSensor(estado, variable.clave)) {
+                <span class="sin-dato">Sin sensor</span>
+              } @else if (valor(estado, variable.clave) !== null) {
+                {{ valor(estado, variable.clave) | number: '1.0-1' }}
+                <small>{{ variable.unidad }}</small>
+              } @else {
+                <span class="sin-dato">—</span>
+              }
+            </dd>
+          </div>
+        }
+      </dl>
+
+      @for (alerta of alertasDelNodo(estado); track alerta.id) {
+        <p class="alerta-nodo" [class]="alerta.severidad">{{ alerta.mensaje }}</p>
+      }
+
+      <footer>
+        @if (estado.ultima; as ultima) {
+          Última lectura: {{ ultima.ts | date: 'dd/MM HH:mm:ss' }}
+        } @else {
+          Sin lecturas todavía
+        }
+        · {{ estado.nodo.invernadero_id }}/{{ estado.nodo.id }} · {{ estado.nodo.sensor_aire }}
+      </footer>
+    </article>
+  } @empty {
+    <p class="vacio">No hay nodos registrados.</p>
+  }
+</div>

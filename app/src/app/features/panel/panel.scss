@@ -1,0 +1,132 @@
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0 0 0.75rem;
+  }
+}
+
+.en-vivo {
+  font-size: 0.8rem;
+  color: #777;
+
+  &.activo {
+    color: var(--gs-verde);
+  }
+}
+
+.aviso {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: #fdecea;
+  color: var(--gs-critico);
+}
+
+.nodos {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.nodo {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  footer {
+    margin-top: 0.75rem;
+    font-size: 0.75rem;
+    color: #666;
+  }
+}
+
+.estado {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: #eee;
+  color: #555;
+
+  &.conectado {
+    background: #e8f5e9;
+    color: var(--gs-verde);
+  }
+
+  &.desconectado {
+    background: #fdecea;
+    color: var(--gs-critico);
+  }
+}
+
+.variables {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.variable {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.15rem 0.5rem;
+  border-left: 4px solid var(--gs-normal);
+  border-radius: 4px;
+
+  &.advertencia {
+    border-left-color: var(--gs-advertencia);
+    background: #fff8e1;
+  }
+
+  &.critica {
+    border-left-color: var(--gs-critico);
+    background: #fdecea;
+  }
+
+  dt {
+    color: #555;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+
+    small {
+      font-size: 0.8rem;
+      font-weight: 400;
+    }
+  }
+}
+
+.sin-dato {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #999;
+}
+
+.alerta-nodo {
+  margin: 0.6rem 0 0;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fff8e1;
+
+  &.critica {
+    background: #fdecea;
+    color: var(--gs-critico);
+  }
+}

@@ -42,3 +42,19 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       - run: pytest --cov=greensense --cov-report=term-missing
+
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watch=false
+      - run: npm run build
