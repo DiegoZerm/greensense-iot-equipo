@@ -1,0 +1,48 @@
+[project]
+name = "greensense"
+version = "0.1.0"
+description = "Servidor de GreenSense IoT: recepción MQTT, reglas, alertas y API"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "aiomqtt>=2.5",
+    "sqlalchemy[asyncio]>=2.1",
+    "psycopg[binary]>=3.3",
+    "alembic>=1.20",
+    "pywebpush>=2.0",
+    "pyjwt>=2.10",
+    "argon2-cffi>=25.1",
+]
+
+[project.scripts]
+greensense = "greensense.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "httpx2>=2.16",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["greensense"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --strict-markers"
+markers = ["postgres: necesita una base de datos de pruebas (GREENSENSE_PRUEBAS_DB)"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
