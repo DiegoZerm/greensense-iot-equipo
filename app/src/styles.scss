@@ -1,0 +1,110 @@
+:root {
+  --gs-verde: #2e7d32;
+  --gs-normal: #2e7d32;
+  --gs-advertencia: #f9a825;
+  --gs-critico: #c62828;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+/* Formularios y tablas de las pantallas de configuración. */
+.gs-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: flex-end;
+
+  label {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.8rem;
+    color: #444;
+  }
+
+  input,
+  select {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    font: inherit;
+  }
+
+  input[type='number'] {
+    width: 5.5rem;
+  }
+}
+
+.gs-boton {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--gs-verde);
+  border-radius: 6px;
+  background: var(--gs-verde);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+
+  &.secundario {
+    background: #fff;
+    color: var(--gs-verde);
+  }
+
+  &.peligro {
+    border-color: var(--gs-critico);
+    background: #fff;
+    color: var(--gs-critico);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.gs-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.4rem 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  tr.inactivo td {
+    color: #999;
+  }
+}
+
+.gs-aviso {
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background: #fdecea;
+  color: var(--gs-critico);
+
+  &.exito {
+    background: #e8f5e9;
+    color: var(--gs-verde);
+  }
+}
+
+.gs-nota {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Las tablas anchas se desplazan en el teléfono en lugar de romper la página. */
+.gs-desplazable {
+  overflow-x: auto;
+}
