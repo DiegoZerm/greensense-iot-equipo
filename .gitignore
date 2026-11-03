@@ -1,0 +1,33 @@
+# Secretos y configuración local
+.env
+*.env
+!.env.example
+firmware/include/config_nodo.h
+infra/mosquitto/passwd
+*.pem
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# PlatformIO
+firmware/.pio/
+
+# Node / Angular
+node_modules/
+app/dist/
+app/.angular/
+
+# Análisis
+analisis/datos/
+.ipynb_checkpoints/
+
+# Editor y sistema
+.vscode/
+.idea/
+.DS_Store
