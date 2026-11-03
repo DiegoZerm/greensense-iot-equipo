@@ -1,0 +1,1 @@
+{"v": 1, "estado": "conectado", "arranque": 3, "firmware": "0.1.0", "sensor_aire": "DHT11", "sensor_suelo": false, "periodo_s": 60}

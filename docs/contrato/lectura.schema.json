@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "greensense/contrato/lectura/v1",
+  "title": "Lectura de un nodo GreenSense",
+  "description": "Mensaje publicado en greensense/{invernadero}/{nodo}/lecturas",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "nodo", "arranque", "seq", "ts", "temperatura", "humedad_aire", "humedad_sustrato"],
+  "properties": {
+    "v": { "const": 1, "description": "Versión del contrato" },
+    "nodo": { "type": "string", "pattern": "^[a-z0-9-]{1,32}$" },
+    "arranque": { "type": "integer", "minimum": 0, "description": "Contador de encendidos del nodo, guardado en su memoria" },
+    "seq": { "type": "integer", "minimum": 0, "description": "Consecutivo de lecturas dentro del arranque" },
+    "ts": { "type": "string", "format": "date-time", "description": "Hora de la lectura en UTC, obtenida por NTP" },
+    "temperatura": { "type": ["number", "null"], "description": "°C. null si el sensor falló" },
+    "humedad_aire": { "type": ["number", "null"], "description": "% HR. null si el sensor falló" },
+    "humedad_sustrato": { "type": ["number", "null"], "description": "%. null si el nodo no tiene sensor de suelo o falló" },
+    "muestras": { "type": "integer", "minimum": 1, "maximum": 20, "description": "Muestras promediadas" },
+    "rssi": { "type": "integer", "minimum": -127, "maximum": 0, "description": "Intensidad de la señal WiFi en dBm" }
+  }
+}
