@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "greensense/contrato/estado/v1",
+  "title": "Estado de un nodo GreenSense",
+  "description": "Mensaje retenido en greensense/{invernadero}/{nodo}/estado. El de desconexión es el mensaje de última voluntad.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["v", "estado"],
+  "properties": {
+    "v": { "const": 1 },
+    "estado": { "enum": ["conectado", "desconectado"] },
+    "arranque": { "type": "integer", "minimum": 0 },
+    "firmware": { "type": "string", "maxLength": 16 },
+    "sensor_aire": { "enum": ["DHT11", "DHT22"] },
+    "sensor_suelo": { "type": "boolean" },
+    "periodo_s": { "type": "integer", "minimum": 5, "maximum": 3600 }
+  },
+  "if": { "properties": { "estado": { "const": "conectado" } } },
+  "then": { "required": ["arranque", "firmware", "sensor_aire", "sensor_suelo", "periodo_s"] }
+}

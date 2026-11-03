@@ -1,0 +1,34 @@
+# Entorno local de GreenSense IoT.
+# Antes del primer arranque: cp .env.example .env && ./mosquitto/crear_usuarios.sh
+name: greensense
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "${MQTT_PUERTO:-1883}:1883"
+    volumes:
+      - ./mosquitto:/mosquitto/config:ro
+      - mosquitto-datos:/mosquitto/data
+    restart: unless-stopped
+
+  db:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      POSTGRES_DB: ${DB_NOMBRE:-greensense}
+      POSTGRES_USER: ${DB_USUARIO:-greensense}
+      POSTGRES_PASSWORD: ${DB_CONTRASENA:?Falta DB_CONTRASENA en infra/.env}
+    ports:
+      - "${DB_PUERTO:-5432}:5432"
+    volumes:
+      - db-datos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  mosquitto-datos:
+  db-datos:
