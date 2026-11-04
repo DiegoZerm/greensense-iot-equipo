@@ -118,6 +118,39 @@ Las notificaciones necesitan claves VAPID en `infra/.env`:
 .venv/bin/greensense vapid >> ../infra/.env
 ```
 
+## Simulador
+
+Publica lecturas como si fuera un nodo, con ciclo de día y noche y riego.
+
+```bash
+.venv/bin/gs-simulador --nodo nodo1 --contrasena <clave MQTT> --periodo 5
+.venv/bin/gs-simulador --nodo nodo1 --contrasena <clave> --escenario calor   # normal, calor, seco, hongos
+.venv/bin/gs-simulador --nodo nodo1 --contrasena <clave> --sensor-aire DHT11 --sin-suelo
+.venv/bin/gs-simulador --nodo nodo1 --contrasena <clave> --historico 48      # 48 h de datos y termina
+.venv/bin/gs-simulador --nodo nodo1 --contrasena <clave> --forzar temperatura=31   # condición fuera de rango
+```
+
+## Datos de demostración
+
+`gs-demo` llena una base aparte (`greensense_demo`) con una semana inventada y sirve la API en el puerto 8001, con lecturas nuevas cada 15 s. No usa MQTT ni toca la base de los datos reales. Los días se simulan con los mismos casos de uso del servidor y un reloj que avanza minuto a minuto, así que las alertas, la bitácora y los resúmenes salen de las reglas reales.
+
+```bash
+.venv/bin/gs-demo              # la primera vez genera 7 días (unos 10 min); después se pone al día
+.venv/bin/gs-demo --regenerar  # borra la base de demostración y la genera otra vez
+cd ../app && npm run demo      # http://localhost:4201, la app conectada a la demostración
+```
+
+Usuarios, todos con la contraseña `demo12345`: `ana@greensense.local` (administradora), `bruno@` (supervisor), `carla@` (técnica) y `daniel@` (operador). `practicante@` está desactivado.
+
+| Nodo | Qué prueba |
+|---|---|
+| `norte/lechuga-1` | Riego fallido hace 5 días (sustrato bajo, crítica atendida); ahora la humedad del aire cerca del máximo (advertencia activa) |
+| `norte/espinaca-1` | DHT11 sin sensor de suelo (enteros, sin reglas de sustrato); una noche con riesgo de hongos hace 3 días |
+| `norte/semillero` | 4 h sin corriente hace 2 días (desconexión y arranque nuevo); ahora desconectado |
+| `sur/tomate-1` | Cultivo "Tomate" con sus propios umbrales; calor hace 4 días y ahora (crítica activa) |
+| `sur/tomate-2` | Falla del sensor de aire hace 6 días, valores imposibles sueltos y ahora sustrato encharcado (advertencia que espera 3 h) |
+| `sur/prueba-1` | Dado de baja hace 3 días: no sale en el panel, pero conserva su historial |
+
 ## Pruebas
 
 ```bash
