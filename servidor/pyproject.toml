@@ -20,6 +20,7 @@ dependencies = [
 [project.scripts]
 greensense = "greensense.cli:main"
 gs-simulador = "simulador.__main__:main"
+gs-demo = "simulador.demo:main"
 
 [project.optional-dependencies]
 dev = [
