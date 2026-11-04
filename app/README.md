@@ -6,6 +6,7 @@ Aplicación web progresiva de GreenSense IoT, hecha con Angular 22 (componentes 
 cd app
 npm ci
 npm start          # http://localhost:4200, /api se redirige al servidor en el puerto 8000
+npm run demo       # http://localhost:4201, con los datos inventados de gs-demo (puerto 8001)
 npm test           # pruebas con Vitest
 npm run build      # build de producción en dist/
 ```
