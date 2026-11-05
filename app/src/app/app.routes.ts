@@ -3,6 +3,11 @@ import { permisoGuard, sesionGuard } from './core/autenticacion';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    title: 'Iniciar sesión · GreenSense',
+    loadComponent: () => import('./features/login/login').then((m) => m.Login),
+  },
+  {
     path: '',
     canActivate: [sesionGuard],
     children: [
