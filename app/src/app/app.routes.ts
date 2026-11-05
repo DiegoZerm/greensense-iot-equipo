@@ -17,6 +17,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/panel/panel').then((m) => m.Panel),
       },
       {
+        path: 'alertas',
+        title: 'Alertas · GreenSense',
+        loadComponent: () => import('./features/alertas/alertas').then((m) => m.Alertas),
+      },
+      {
         path: 'historial',
         title: 'Historial · GreenSense',
         canActivate: [permisoGuard('consultar_historial')],
