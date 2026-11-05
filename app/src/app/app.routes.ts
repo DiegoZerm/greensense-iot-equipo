@@ -41,6 +41,11 @@ export const routes: Routes = [
         canActivate: [permisoGuard('consultar_bitacora')],
         loadComponent: () => import('./features/bitacora/bitacora').then((m) => m.Bitacora),
       },
+      {
+        path: 'cuenta',
+        title: 'Mi cuenta · GreenSense',
+        loadComponent: () => import('./features/cuenta/cuenta').then((m) => m.Cuenta),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
