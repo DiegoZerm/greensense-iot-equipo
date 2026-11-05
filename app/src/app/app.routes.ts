@@ -35,6 +35,12 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/configuracion/configuracion.routes').then((m) => m.rutas),
       },
+      {
+        path: 'bitacora',
+        title: 'Bitácora · GreenSense',
+        canActivate: [permisoGuard('consultar_bitacora')],
+        loadComponent: () => import('./features/bitacora/bitacora').then((m) => m.Bitacora),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
