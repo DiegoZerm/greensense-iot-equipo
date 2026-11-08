@@ -22,10 +22,11 @@ npm run build      # build de producción en dist/
 |---|---|
 | `core/` | Servicios: sesión, interceptor y guards (`autenticacion.ts`), tiempo real, estado actual, alertas, push y configuración |
 | `features/login`, `cuenta` | Inicio de sesión y cambio de la contraseña propia |
-| `features/panel`, `alertas` | Panel en vivo e historial de alertas (con quién atendió cada una) |
+| `features/panel`, `alertas` | Panel en vivo con la gráfica de las últimas 6 horas, e historial de alertas con filtros por severidad, variable y fecha (con quién atendió cada una) |
 | `features/configuracion` | Cultivos y umbrales, invernaderos, nodos y usuarios |
 | `features/bitacora` | Registro de cambios, altas, bajas, exportaciones e inicios de sesión |
-| `features/historial` | Gráficas de día (lecturas), semana (por hora) y mes (por día), resumen con lecturas perdidas y exportación a CSV |
+| `features/historial` | Gráficas de día (lecturas), semana (por hora), mes (por día) y rango libre (el detalle depende de su largo), filtro por variable, resumen con lecturas perdidas y exportación a CSV |
+| `shared/tendencia` | Gráfica pequeña del panel: sin ejes, con la ventana, el mínimo y el máximo como texto, y el valor bajo el puntero |
 | `shared/grafica-serie` | Gráfica SVG sin dependencias: línea, banda de mínimo a máximo, rango adecuado del cultivo, cortes donde faltan datos, cursor y vista en tabla |
 
 ## Historial
