@@ -5,7 +5,7 @@ from datetime import datetime
 from itertools import count
 
 from greensense.aplicacion.errores import CorreoDuplicado
-from greensense.dominio.alertas import Alerta
+from greensense.dominio.alertas import Alerta, FiltroAlertas
 from greensense.dominio.bitacora import RegistroBitacora
 from greensense.dominio.cultivo import Cultivo
 from greensense.dominio.historial import (
@@ -139,8 +139,16 @@ class RepositorioAlertasMemoria:
     async def activas(self, nodo_id: str | None = None) -> list[Alerta]:
         return [a for a in self._alertas.values() if a.activa and nodo_id in (None, a.nodo_id)]
 
-    async def listar(self, solo_activas: bool = False, limite: int = 100) -> list[Alerta]:
-        alertas = [a for a in self._alertas.values() if a.activa or not solo_activas]
+    async def listar(
+        self,
+        solo_activas: bool = False,
+        limite: int = 100,
+        filtro: FiltroAlertas | None = None,
+    ) -> list[Alerta]:
+        filtro = filtro or FiltroAlertas()
+        alertas = [
+            a for a in self._alertas.values() if (a.activa or not solo_activas) and filtro.acepta(a)
+        ]
         alertas.sort(key=lambda a: (a.iniciada_en, a.id), reverse=True)
         return alertas[:limite]
 

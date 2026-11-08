@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Protocol
 
-from greensense.dominio.alertas import Alerta
+from greensense.dominio.alertas import Alerta, FiltroAlertas
 from greensense.dominio.bitacora import RegistroBitacora
 from greensense.dominio.cultivo import Cultivo
 from greensense.dominio.historial import Agregado, Estadistica, Periodo
@@ -79,7 +79,12 @@ class RepositorioAlertas(Protocol):
 
     async def activas(self, nodo_id: str | None = None) -> list[Alerta]: ...
 
-    async def listar(self, solo_activas: bool = False, limite: int = 100) -> list[Alerta]:
+    async def listar(
+        self,
+        solo_activas: bool = False,
+        limite: int = 100,
+        filtro: FiltroAlertas | None = None,
+    ) -> list[Alerta]:
         """Las más recientes primero."""
         ...
 

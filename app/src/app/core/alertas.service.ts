@@ -2,8 +2,19 @@ import { HttpClient } from '@angular/common/http';
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, tap } from 'rxjs';
-import { Alerta } from './modelos';
+import { Alerta, Severidad, Variable } from './modelos';
 import { TiempoRealService } from './tiempo-real.service';
+
+export const LIMITE_CONSULTA = 500;
+
+export interface FiltroAlertas {
+  severidad?: Severidad;
+  variable?: Variable;
+  /** ISO con zona, incluido: se compara con el inicio de la alerta. */
+  desde?: string;
+  /** ISO con zona, no incluido. */
+  hasta?: string;
+}
 
 /** Historial de alertas, actualizado en tiempo real. */
 @Injectable({ providedIn: 'root' })
@@ -43,6 +54,13 @@ export class AlertasService {
 
   desconectar(): void {
     this.tiempoReal.desconectar();
+  }
+
+  /** Consulta el historial con filtros; no cambia la lista ni el contador de la barra. */
+  consultar(filtro: FiltroAlertas): Observable<Alerta[]> {
+    return this.http.get<Alerta[]>('/api/v1/alertas', {
+      params: { limite: LIMITE_CONSULTA, ...filtro },
+    });
   }
 
   atender(id: number): Observable<Alerta> {

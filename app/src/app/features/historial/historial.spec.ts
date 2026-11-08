@@ -121,6 +121,54 @@ describe('Historial', () => {
     );
   });
 
+  it('el rango libre elige el detalle según su largo', async () => {
+    const base = { nodo: 'nodo1', vista: 'rango' };
+    const { fixture } = await mostrar({ ...base, desde: '2026-10-10', fecha: '2026-10-11' });
+    expect(historial.lecturas).toHaveBeenCalledWith({
+      nodo: 'nodo1',
+      desde: '2026-10-10T00:00:00-06:00',
+      hasta: '2026-10-12T00:00:00-06:00',
+    });
+    expect(historial.agregadas).not.toHaveBeenCalled();
+
+    parametros.next(convertToParamMap({ ...base, desde: '2026-10-01', fecha: '2026-10-10' }));
+    await fixture.whenStable();
+    expect(historial.agregadas).toHaveBeenLastCalledWith(expect.anything(), 'hora');
+
+    parametros.next(convertToParamMap({ ...base, desde: '2026-08-01', fecha: '2026-10-10' }));
+    await fixture.whenStable();
+    expect(historial.agregadas).toHaveBeenLastCalledWith(expect.anything(), 'dia');
+  });
+
+  it('elegir una variable deja solo su gráfica y su cifra', async () => {
+    const { raiz } = await mostrar({ nodo: 'nodo1', variable: 'humedad_aire' });
+
+    expect(raiz.querySelectorAll('gs-grafica-serie')).toHaveLength(1);
+    expect(raiz.querySelector('.resumen')!.textContent).toContain('Humedad del aire');
+    expect(raiz.querySelector('.resumen')!.textContent).not.toContain('Temperatura');
+  });
+
+  it('"Todas" quita la variable de la URL y conserva el periodo', async () => {
+    const { raiz } = await mostrar({
+      nodo: 'nodo1',
+      vista: 'semana',
+      fecha: '2026-10-10',
+      variable: 'temperatura',
+    });
+    const navegar = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    const selector = raiz.querySelector<HTMLSelectElement>('select[aria-label="Variable"]')!;
+    selector.value = '';
+    selector.dispatchEvent(new Event('change'));
+
+    expect(navegar).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({
+        queryParams: expect.objectContaining({ vista: 'semana', variable: undefined }),
+      }),
+    );
+  });
+
   it('muestra el resumen con las lecturas perdidas', async () => {
     const { raiz } = await mostrar();
 

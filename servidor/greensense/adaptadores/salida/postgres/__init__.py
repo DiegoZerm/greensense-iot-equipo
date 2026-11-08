@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from greensense.adaptadores.salida.postgres import tablas
 from greensense.aplicacion.errores import CorreoDuplicado
-from greensense.dominio.alertas import Alerta, Severidad, TipoAlerta
+from greensense.dominio.alertas import Alerta, FiltroAlertas, Severidad, TipoAlerta
 from greensense.dominio.bitacora import Accion, Objeto, RegistroBitacora
 from greensense.dominio.cultivo import Cultivo, RiesgoHongos, Umbral
 from greensense.dominio.historial import ZONA_HORARIA, Agregado, Estadistica, Periodo
@@ -385,11 +385,25 @@ class RepositorioAlertasPostgres:
             filas = (await conexion.execute(sentencia)).mappings().all()
         return [_a_alerta(f) for f in filas]
 
-    async def listar(self, solo_activas: bool = False, limite: int = 100) -> list[Alerta]:
+    async def listar(
+        self,
+        solo_activas: bool = False,
+        limite: int = 100,
+        filtro: FiltroAlertas | None = None,
+    ) -> list[Alerta]:
         t = tablas.alerta
+        filtro = filtro or FiltroAlertas()
         sentencia = select(t).order_by(t.c.iniciada_en.desc(), t.c.id.desc()).limit(limite)
         if solo_activas:
             sentencia = sentencia.where(t.c.resuelta_en.is_(None))
+        if filtro.severidad is not None:
+            sentencia = sentencia.where(t.c.severidad == filtro.severidad.value)
+        if filtro.variable is not None:
+            sentencia = sentencia.where(t.c.variable == filtro.variable.value)
+        if filtro.desde is not None:
+            sentencia = sentencia.where(t.c.iniciada_en >= filtro.desde)
+        if filtro.hasta is not None:
+            sentencia = sentencia.where(t.c.iniciada_en < filtro.hasta)
         async with self._motor.connect() as conexion:
             filas = (await conexion.execute(sentencia)).mappings().all()
         return [_a_alerta(f) for f in filas]

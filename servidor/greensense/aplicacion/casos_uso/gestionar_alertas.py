@@ -2,7 +2,7 @@ from dataclasses import replace
 
 from greensense.aplicacion.errores import AlertaNoEncontrada
 from greensense.aplicacion.puertos import Evento, PublicadorEventos, Reloj, RepositorioAlertas
-from greensense.dominio.alertas import Alerta
+from greensense.dominio.alertas import Alerta, FiltroAlertas
 from greensense.dominio.usuarios import Usuario
 
 
@@ -10,8 +10,13 @@ class ConsultarAlertas:
     def __init__(self, alertas: RepositorioAlertas) -> None:
         self._alertas = alertas
 
-    async def ejecutar(self, solo_activas: bool = False, limite: int = 100) -> list[Alerta]:
-        return await self._alertas.listar(solo_activas=solo_activas, limite=limite)
+    async def ejecutar(
+        self,
+        solo_activas: bool = False,
+        limite: int = 100,
+        filtro: FiltroAlertas | None = None,
+    ) -> list[Alerta]:
+        return await self._alertas.listar(solo_activas=solo_activas, limite=limite, filtro=filtro)
 
 
 class AtenderAlerta:

@@ -19,10 +19,13 @@ import { SesionService } from '../../core/sesion.service';
 import { formatear, hoyLocal, inicioDelDia, isoLocal, sumarDias } from '../../core/tiempo';
 import { GraficaSerie, Punto, RangoReferencia } from '../../shared/grafica-serie';
 
-export type Vista = 'dia' | 'semana' | 'mes';
+export type Vista = 'dia' | 'semana' | 'mes' | 'rango';
 
-const DIAS: Record<Vista, number> = { dia: 1, semana: 7, mes: 30 };
+const DIAS: Record<Exclude<Vista, 'rango'>, number> = { dia: 1, semana: 7, mes: 30 };
 const HORA = 3_600_000;
+/** En un rango libre se elige el detalle según su largo, igual que en las vistas fijas. */
+const DIAS_SIN_AGREGAR = 2;
+const DIAS_POR_HORA = 14;
 
 interface Datos {
   clave: string;
@@ -49,6 +52,7 @@ export class Historial {
     { clave: 'dia', nombre: 'Día' },
     { clave: 'semana', nombre: 'Semana' },
     { clave: 'mes', nombre: 'Mes' },
+    { clave: 'rango', nombre: 'Rango' },
   ];
   protected readonly variables = VARIABLES;
   protected readonly hoy = hoyLocal();
@@ -60,12 +64,30 @@ export class Historial {
   });
   protected readonly vista = computed<Vista>(() => {
     const v = this.parametros().get('vista');
-    return v === 'semana' || v === 'mes' ? v : 'dia';
+    return v === 'semana' || v === 'mes' || v === 'rango' ? v : 'dia';
   });
   /** Último día que se muestra (AAAA-MM-DD, hora de México). */
   protected readonly fecha = computed(() => {
     const f = this.parametros().get('fecha');
     return f && /^\d{4}-\d{2}-\d{2}$/.test(f) && f <= this.hoy ? f : this.hoy;
+  });
+  /** Primer día del rango libre. Si no es válido, una semana antes del último día. */
+  protected readonly desde = computed(() => {
+    const d = this.parametros().get('desde');
+    const valido = d && /^\d{4}-\d{2}-\d{2}$/.test(d) && d <= this.fecha();
+    return valido ? d : sumarDias(this.fecha(), -6);
+  });
+  /** Días que abarca el periodo mostrado. */
+  private readonly dias = computed(() => {
+    const vista = this.vista();
+    if (vista !== 'rango') return DIAS[vista];
+    const inicio = inicioDelDia(this.desde()).getTime();
+    return Math.round((inicioDelDia(this.fecha()).getTime() - inicio) / (24 * HORA)) + 1;
+  });
+  /** La variable elegida, o null para mostrar todas. */
+  protected readonly variable = computed<Variable | null>(() => {
+    const v = this.parametros().get('variable');
+    return VARIABLES.find((x) => x.clave === v)?.clave ?? null;
   });
 
   private readonly catalogos = toSignal(
@@ -96,7 +118,7 @@ export class Historial {
     const nodo = this.nodo();
     if (!nodo) return null;
     const hasta = inicioDelDia(sumarDias(this.fecha(), 1));
-    const desde = inicioDelDia(sumarDias(this.fecha(), 1 - DIAS[this.vista()]));
+    const desde = inicioDelDia(sumarDias(this.fecha(), 1 - this.dias()));
     return { nodo: nodo.id, desde: isoLocal(desde), hasta: isoLocal(hasta) };
   });
   protected readonly limites = computed(() => {
@@ -144,38 +166,50 @@ export class Historial {
   protected readonly visibles = computed(() => {
     const datos = this.datos();
     const nodo = this.nodo();
-    return VARIABLES.filter(
+    const mide = VARIABLES.filter(
       (v) =>
         v.clave !== 'humedad_sustrato' ||
         nodo?.sensor_suelo ||
         (datos?.resumen.variables.humedad_sustrato ?? null) !== null,
     );
+    const elegida = this.variable();
+    return elegida ? mide.filter((v) => v.clave === elegida) : mide;
   });
 
   protected readonly titulo = computed(() => {
     const fin = inicioDelDia(this.fecha());
-    if (this.vista() === 'dia') {
+    if (this.dias() === 1) {
       return formatear(fin, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     }
-    const inicio = inicioDelDia(sumarDias(this.fecha(), 1 - DIAS[this.vista()]));
+    const inicio = inicioDelDia(sumarDias(this.fecha(), 1 - this.dias()));
     const corto: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' };
     return `${formatear(inicio, corto)} al ${formatear(fin, { ...corto, year: 'numeric' })}`;
   });
 
-  protected cambiar(cambios: { nodo?: string; vista?: Vista; fecha?: string }): void {
+  protected cambiar(cambios: {
+    nodo?: string;
+    vista?: Vista;
+    fecha?: string;
+    desde?: string;
+    variable?: Variable | '';
+  }): void {
+    const vista = cambios.vista ?? this.vista();
+    const variable = cambios.variable ?? this.variable();
     void this.router.navigate([], {
       relativeTo: this.ruta,
       queryParams: {
         nodo: cambios.nodo ?? this.nodo()?.id,
-        vista: cambios.vista ?? this.vista(),
+        vista,
         fecha: cambios.fecha ?? this.fecha(),
+        desde: vista === 'rango' ? (cambios.desde ?? this.desde()) : undefined,
+        variable: variable || undefined,
       },
       replaceUrl: true,
     });
   }
 
   protected mover(sentido: -1 | 1): void {
-    const fecha = sumarDias(this.fecha(), sentido * DIAS[this.vista()]);
+    const fecha = sumarDias(this.fecha(), sentido * this.dias());
     this.cambiar({ fecha: fecha > this.hoy ? this.hoy : fecha });
   }
 
@@ -196,7 +230,7 @@ export class Historial {
   private consultar(rango: Rango, vista: Vista) {
     const clave = `${rango.nodo}|${rango.desde}|${vista}`;
     const resumen = this.historial.resumen(rango);
-    if (vista === 'dia') {
+    if (vista === 'dia' || (vista === 'rango' && this.dias() <= DIAS_SIN_AGREGAR)) {
       return forkJoin([this.historial.lecturas(rango), resumen]).pipe(
         map(([serie, r]): Datos => ({
           clave,
@@ -207,7 +241,8 @@ export class Historial {
         })),
       );
     }
-    const periodo = vista === 'semana' ? 'hora' : 'dia';
+    const porHora = vista === 'semana' || (vista === 'rango' && this.dias() <= DIAS_POR_HORA);
+    const periodo = porHora ? 'hora' : 'dia';
     return forkJoin([this.historial.agregadas(rango, periodo), resumen]).pipe(
       map(([agregados, r]): Datos => ({
         clave,

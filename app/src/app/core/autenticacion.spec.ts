@@ -40,6 +40,15 @@ describe('Guards de sesión y permisos', () => {
     expect(texto(await correr(permisoGuard('administrar_usuarios')))).toBe('/');
   });
 
+  it('al regresar al panel corrige también la barra de direcciones', async () => {
+    configurar(sesionFalsa(usuarioSesion({ rol: 'operador' }, ['ver_panel'])));
+    const resultado = (await correr(permisoGuard('consultar_bitacora'))) as RedirectCommand;
+    expect(resultado.navigationBehaviorOptions).toEqual({
+      onSameUrlNavigation: 'reload',
+      replaceUrl: true,
+    });
+  });
+
   it('basta con uno de los permisos pedidos', async () => {
     configurar(sesionFalsa(usuarioSesion({ rol: 'tecnico' }, ['gestionar_nodos'])));
     expect(await correr(permisoGuard('configurar_cultivos', 'gestionar_nodos'))).toBe(true);

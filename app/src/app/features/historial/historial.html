@@ -22,30 +22,63 @@
     }
   </div>
 
-  <div class="fechas">
-    <button type="button" class="flecha" (click)="mover(-1)" aria-label="Periodo anterior">
-      ‹
-    </button>
-    <input
-      type="date"
-      [value]="fecha()"
-      [max]="hoy"
-      (change)="$any($event.target).value && cambiar({ fecha: $any($event.target).value })"
-      aria-label="Último día del periodo"
-    />
-    <button
-      type="button"
-      class="flecha"
-      (click)="mover(1)"
-      [disabled]="fecha() >= hoy"
-      aria-label="Periodo siguiente"
-    >
-      ›
-    </button>
-    @if (fecha() !== hoy) {
-      <button type="button" class="hoy" (click)="cambiar({ fecha: hoy })">Hoy</button>
-    }
-  </div>
+  <label>
+    Variable
+    <select (change)="cambiar({ variable: $any($event.target).value })" aria-label="Variable">
+      <option value="" [selected]="!variable()">Todas</option>
+      @for (v of variables; track v.clave) {
+        <option [value]="v.clave" [selected]="v.clave === variable()">{{ v.nombre }}</option>
+      }
+    </select>
+  </label>
+
+  @if (vista() === 'rango') {
+    <div class="fechas rango">
+      <label>
+        Desde
+        <input
+          type="date"
+          [value]="desde()"
+          [max]="fecha()"
+          (change)="$any($event.target).value && cambiar({ desde: $any($event.target).value })"
+        />
+      </label>
+      <label>
+        Hasta
+        <input
+          type="date"
+          [value]="fecha()"
+          [max]="hoy"
+          (change)="$any($event.target).value && cambiar({ fecha: $any($event.target).value })"
+        />
+      </label>
+    </div>
+  } @else {
+    <div class="fechas">
+      <button type="button" class="flecha" (click)="mover(-1)" aria-label="Periodo anterior">
+        ‹
+      </button>
+      <input
+        type="date"
+        [value]="fecha()"
+        [max]="hoy"
+        (change)="$any($event.target).value && cambiar({ fecha: $any($event.target).value })"
+        aria-label="Último día del periodo"
+      />
+      <button
+        type="button"
+        class="flecha"
+        (click)="mover(1)"
+        [disabled]="fecha() >= hoy"
+        aria-label="Periodo siguiente"
+      >
+        ›
+      </button>
+      @if (fecha() !== hoy) {
+        <button type="button" class="hoy" (click)="cambiar({ fecha: hoy })">Hoy</button>
+      }
+    </div>
+  }
 
   @if (puedeExportar()) {
     <div class="exportar">

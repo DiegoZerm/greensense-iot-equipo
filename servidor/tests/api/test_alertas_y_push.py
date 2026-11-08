@@ -56,6 +56,33 @@ async def test_alerta_aparece_en_la_api_y_en_el_estado_actual(app, cliente):
     assert atendida["atendida_por_nombre"] == "Usuario operador"
 
 
+async def test_filtros_del_historial_de_alertas(app, cliente):
+    from datetime import UTC, datetime, timedelta
+
+    ahora = datetime.now(UTC).replace(microsecond=0)
+    await app.state.contenedor.registrar_lectura.ejecutar(
+        "inv1", crear_lectura(ts=ahora, temperatura=27.0)
+    )
+
+    async def cuantas(**parametros):
+        respuesta = await cliente.get("/api/v1/alertas", params=parametros)
+        assert respuesta.status_code == 200
+        return len(respuesta.json())
+
+    assert await cuantas(severidad="advertencia", variable="temperatura") == 1
+    assert await cuantas(severidad="critica") == 0
+    assert await cuantas(variable="humedad_aire") == 0
+    manana = (ahora + timedelta(days=1)).isoformat()
+    assert await cuantas(hasta=ahora.isoformat()) == 0
+    assert await cuantas(desde=ahora.isoformat(), hasta=manana) == 1
+    assert await cuantas(desde=manana) == 0
+
+    # Valores inválidos y rango al revés.
+    assert (await cliente.get("/api/v1/alertas", params={"severidad": "x"})).status_code == 422
+    invertido = {"desde": manana, "hasta": ahora.isoformat()}
+    assert (await cliente.get("/api/v1/alertas", params=invertido)).status_code == 422
+
+
 async def test_atender_alerta_inexistente(cliente):
     assert (await cliente.post("/api/v1/alertas/999/atender")).status_code == 404
 

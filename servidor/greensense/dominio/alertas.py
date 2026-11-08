@@ -76,6 +76,30 @@ class Alerta:
         return (self.nodo_id, self.tipo, self.variable)
 
 
+@dataclass(frozen=True)
+class FiltroAlertas:
+    """Criterios del historial. Lo que quede en None no filtra."""
+
+    severidad: Severidad | None = None
+    variable: Variable | None = None
+    desde: datetime | None = None
+    """Incluido: alertas iniciadas a partir de este momento."""
+    hasta: datetime | None = None
+    """No incluido."""
+
+    def __post_init__(self) -> None:
+        if self.desde is not None and self.hasta is not None and self.desde >= self.hasta:
+            raise ValueError("'desde' debe ser anterior a 'hasta'")
+
+    def acepta(self, alerta: Alerta) -> bool:
+        return (
+            self.severidad in (None, alerta.severidad)
+            and self.variable in (None, alerta.variable)
+            and (self.desde is None or alerta.iniciada_en >= self.desde)
+            and (self.hasta is None or alerta.iniciada_en < self.hasta)
+        )
+
+
 class Cambio(StrEnum):
     CREADA = "creada"
     ESCALADA = "escalada"

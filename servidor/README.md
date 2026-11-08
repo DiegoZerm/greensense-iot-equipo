@@ -53,7 +53,7 @@ Todas las rutas piden sesión (`Authorization: Bearer <token>`) salvo `salud`, `
 | `POST /auth/login`, `GET /auth/yo`, `PUT /auth/yo/contrasena` | Iniciar sesión (devuelve el token y los permisos), usuario actual y cambio de la contraseña propia |
 | `GET /lecturas/ultimas` (ver_panel) | Cada nodo activo con su lectura más reciente y sus alertas activas |
 | `GET /eventos?token=` (ver_panel) | Flujo SSE con los eventos `lectura`, `nodo` y `alerta`. El token va en la URL porque EventSource no manda encabezados |
-| `GET /alertas?activas&limite` (ver_panel), `POST /alertas/{id}/atender` (atender_alertas) | Historial; al atender se guarda quién lo hizo |
+| `GET /alertas?activas&limite&severidad&variable&desde&hasta` (ver_panel), `POST /alertas/{id}/atender` (atender_alertas) | Historial; al atender se guarda quién lo hizo |
 | `GET /push/clave-publica`, `POST` y `DELETE /push/suscripciones` | Notificaciones. Cada suscripción es del usuario de la sesión |
 | `GET /cultivos` (ver_panel); `POST`, `PUT /{id}` y `DELETE /{id}` (configurar_cultivos) | Cultivos con sus umbrales y riesgo de hongos |
 | `GET /invernaderos` (ver_panel); `POST`, `PATCH /{id}` y `DELETE /{id}` (configurar_cultivos) | Un invernadero con nodos no se puede borrar |
@@ -108,7 +108,7 @@ Cada lectura nueva se evalúa con las reglas del nodo y con los umbrales del cul
 | Desconexión | — | Sin lecturas durante 5 min o 3 periodos, lo que sea mayor |
 
 - Hay una sola alerta activa por nodo, regla y variable. Se actualiza mientras dura el problema y se resuelve sola cuando el valor vuelve a la normalidad.
-- Una alerta de umbral se resuelve hasta que el valor se aleja del margen otro medio margen (histéresis): con la temperatura de 18 a 28 °C y margen 2, una advertencia abierta a 26.3 °C se cierra hasta bajar de 25 °C. Sin esto, un valor que oscila en el borde abría y cerraba una advertencia en cada lectura: la demostración pasó de 2455 alertas en una semana a 24.
+- Una alerta de umbral se resuelve hasta que el valor se aleja del margen otro medio margen (histéresis): con la temperatura de 18 a 28 °C y margen 2, una advertencia abierta a 26.3 °C se cierra hasta bajar de 25 °C. Sin esto, un valor que oscila en el borde abría y cerraba una advertencia en cada lectura: la demostración pasó de unas 2450 alertas en una semana a unas 20.
 - Las lecturas con más de 10 minutos de antigüedad (reenvíos del nodo) se guardan, pero no generan alertas.
 - Las alertas críticas y las desconexiones se notifican por push a las suscripciones de los usuarios cuyo rol debe recibirlas (ver la tabla de permisos). Si el usuario se desactiva o cambia de rol, sus envíos pendientes se descartan. Cada envío se reintenta con espera creciente (30 s, 1, 2, 4 y 8 min). Las suscripciones vencidas se borran.
 

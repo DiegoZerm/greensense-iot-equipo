@@ -80,6 +80,7 @@
 
 .variable {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
   padding: 0.15rem 0.5rem;
@@ -109,6 +110,12 @@
       font-size: 0.8rem;
       font-weight: 400;
     }
+  }
+
+  dd.tendencia {
+    flex-basis: 100%;
+    font-size: 1rem;
+    font-weight: 400;
   }
 }
 

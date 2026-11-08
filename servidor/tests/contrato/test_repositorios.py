@@ -16,7 +16,7 @@ from sqlalchemy import create_engine, text
 from greensense.adaptadores.salida import memoria, postgres
 from greensense.aplicacion.errores import CorreoDuplicado
 from greensense.cli import migrar
-from greensense.dominio.alertas import Severidad, TipoAlerta
+from greensense.dominio.alertas import FiltroAlertas, Severidad, TipoAlerta
 from greensense.dominio.bitacora import Accion, Objeto, RegistroBitacora
 from greensense.dominio.cultivo import CULTIVO_PREDETERMINADO, Cultivo, RiesgoHongos, Umbral
 from greensense.dominio.modelos import EstadoNodo, Invernadero, SensorAire, Variable
@@ -316,6 +316,29 @@ async def test_listar_alertas_mas_recientes_primero(con_nodo):
     assert await alertas.listar() == [resuelta, vieja]
     assert await alertas.listar(solo_activas=True) == [vieja]
     assert await alertas.listar(limite=1) == [resuelta]
+
+
+async def test_filtrar_alertas_por_severidad_variable_y_fecha(con_nodo):
+    alertas = con_nodo.alertas
+    critica = await alertas.guardar(
+        crear_alerta(severidad=Severidad.CRITICA, iniciada_en=AHORA - timedelta(days=2))
+    )
+    humedad = await alertas.guardar(
+        crear_alerta(variable=Variable.HUMEDAD_AIRE, iniciada_en=AHORA - timedelta(days=1))
+    )
+    del_nodo = await alertas.guardar(
+        crear_alerta(tipo=TipoAlerta.DESCONEXION, variable=None, iniciada_en=AHORA)
+    )
+
+    assert await alertas.listar(filtro=FiltroAlertas(severidad=Severidad.CRITICA)) == [critica]
+    assert await alertas.listar(filtro=FiltroAlertas(variable=Variable.HUMEDAD_AIRE)) == [humedad]
+    # `desde` se incluye y `hasta` no.
+    desde = AHORA - timedelta(days=1)
+    assert await alertas.listar(filtro=FiltroAlertas(desde=desde)) == [del_nodo, humedad]
+    assert await alertas.listar(filtro=FiltroAlertas(hasta=desde)) == [critica]
+    assert (
+        await alertas.listar(filtro=FiltroAlertas(severidad=Severidad.CRITICA, desde=desde)) == []
+    )
 
 
 async def test_suscripcion_se_identifica_por_endpoint(repos, usuario):

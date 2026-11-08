@@ -35,6 +35,19 @@
                 <span class="sin-dato">—</span>
               }
             </dd>
+            @if (!sinSensor(estado, variable.clave)) {
+              <dd class="tendencia">
+                <gs-tendencia
+                  [nombre]="variable.nombre"
+                  [unidad]="variable.unidad"
+                  [puntos]="tendencia(estado, variable.clave)"
+                  [desde]="desde()"
+                  [hasta]="ahora()"
+                  [periodoMs]="estado.nodo.periodo_s * 1000"
+                  [horas]="horas"
+                />
+              </dd>
+            }
           </div>
         }
       </dl>

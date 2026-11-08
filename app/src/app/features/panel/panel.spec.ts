@@ -2,7 +2,8 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { EstadoActualService } from '../../core/estado-actual.service';
 import { alerta, lectura, nodo } from '../../core/fabricas-pruebas';
-import { EstadoActual } from '../../core/modelos';
+import { EstadoActual, Lectura } from '../../core/modelos';
+import { TendenciasService } from '../../core/tendencias.service';
 import { Panel } from './panel';
 
 describe('Panel', () => {
@@ -14,12 +15,17 @@ describe('Panel', () => {
     conectar: vi.fn(),
     desconectar: vi.fn(),
   };
+  const recientes = signal<Lectura[]>([]);
+  const tendencias = { seguir: vi.fn(), lecturas: () => recientes() };
 
   async function mostrar(valor: EstadoActual[]): Promise<HTMLElement> {
     estados.set(valor);
     await TestBed.configureTestingModule({
       imports: [Panel],
-      providers: [{ provide: EstadoActualService, useValue: servicio }],
+      providers: [
+        { provide: EstadoActualService, useValue: servicio },
+        { provide: TendenciasService, useValue: tendencias },
+      ],
     }).compileComponents();
     const fixture = TestBed.createComponent(Panel);
     await fixture.whenStable();
@@ -34,6 +40,22 @@ describe('Panel', () => {
     ultima: lectura(),
     alertas: [],
     ...cambios,
+  });
+
+  it('sigue a cada nodo y dibuja la gráfica de las variables con lecturas', async () => {
+    const hace = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
+    recientes.set([
+      lectura({ ts: hace(5), temperatura: 22, humedad_sustrato: null }),
+      lectura({ ts: hace(4), temperatura: 24, humedad_sustrato: null }),
+    ]);
+    const raiz = await mostrar([estado()]);
+
+    expect(tendencias.seguir).toHaveBeenCalledWith([nodo().id]);
+    const temperatura = raiz.querySelector('[data-variable="temperatura"] gs-tendencia')!;
+    expect(temperatura.textContent).toContain('mín 22 °C · máx 24 °C');
+    // Sin datos del sustrato no hay línea, pero el resto del panel sigue igual.
+    expect(raiz.querySelector('[data-variable="humedad_sustrato"] svg')).toBeNull();
+    recientes.set([]);
   });
 
   it('muestra los valores de la última lectura', async () => {
