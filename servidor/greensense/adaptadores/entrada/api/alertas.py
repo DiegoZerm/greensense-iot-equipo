@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query
@@ -5,6 +6,8 @@ from fastapi import APIRouter, HTTPException, Query
 from greensense.adaptadores.entrada.api.dependencias import ContenedorDep, VerPanel, con_permiso
 from greensense.adaptadores.entrada.api.esquemas import AlertaSalida
 from greensense.aplicacion.errores import AlertaNoEncontrada
+from greensense.dominio.alertas import FiltroAlertas, Severidad
+from greensense.dominio.modelos import Variable
 from greensense.dominio.usuarios import Permiso
 
 router = APIRouter(tags=["alertas"])
@@ -18,9 +21,18 @@ async def consultar_alertas(
     c: ContenedorDep,
     activas: bool = False,
     limite: Annotated[int, Query(ge=1, le=500)] = 100,
+    severidad: Severidad | None = None,
+    variable: Variable | None = None,
+    desde: Annotated[datetime | None, Query(description="ISO 8601 con zona, incluido")] = None,
+    hasta: Annotated[datetime | None, Query(description="ISO 8601 con zona, no incluido")] = None,
 ) -> list[AlertaSalida]:
-    """Alertas más recientes primero. Con `activas=true`, solo las que no se han resuelto."""
-    alertas = await c.consultar_alertas.ejecutar(solo_activas=activas, limite=limite)
+    """Alertas más recientes primero. Con `activas=true`, solo las que no se han resuelto.
+
+    `severidad`, `variable`, `desde` y `hasta` filtran el historial; las fechas se comparan
+    con el inicio de la alerta.
+    """
+    filtro = FiltroAlertas(severidad, variable, desde, hasta)
+    alertas = await c.consultar_alertas.ejecutar(solo_activas=activas, limite=limite, filtro=filtro)
     return [AlertaSalida.model_validate(a) for a in alertas]
 
 
