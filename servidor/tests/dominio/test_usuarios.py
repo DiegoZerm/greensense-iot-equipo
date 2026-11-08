@@ -59,7 +59,7 @@ def test_permiso_para_notificar_cada_tipo(tipo, permiso):
 
 
 def test_correo_se_normaliza():
-    assert normalizar_correo("  Diego@Ejemplo.COM ") == "diego@ejemplo.com"
+    assert normalizar_correo("  Ana@Ejemplo.COM ") == "ana@ejemplo.com"
 
 
 @pytest.mark.parametrize("correo", ["", "sin-arroba", "a@b", "a b@c.com"])
