@@ -48,7 +48,11 @@ export function permisoGuard(...permisos: Permiso[]): CanActivateFn {
     }
     // Al abrir la app directo en una ruta prohibida, el router todavía cree estar en "/" e
     // ignoraría la redirección por ser la misma URL: se pide recargar de todos modos.
-    return new RedirectCommand(router.parseUrl('/'), { onSameUrlNavigation: 'reload' });
+    // replaceUrl corrige también la barra de direcciones, que conservaría la ruta prohibida.
+    return new RedirectCommand(router.parseUrl('/'), {
+      onSameUrlNavigation: 'reload',
+      replaceUrl: true,
+    });
   };
 }
 
