@@ -10,7 +10,8 @@ Sistema de monitoreo ambiental y alertas para invernaderos. Un nodo ESP32 mide l
 | `analisis/` | Análisis de datos | pandas, scikit-learn |
 | `infra/` | Entorno local | Docker Compose, Mosquitto |
 
-La estructura y el orden de construcción están en [`docs/plan.md`](docs/plan.md).
+- [Manual de instalación](docs/manual-instalacion.md) y [manual de uso](docs/manual-uso.md).
+- La estructura y el orden de construcción están en [`docs/plan.md`](docs/plan.md).
 
 ## Probar el sistema completo con el simulador
 
