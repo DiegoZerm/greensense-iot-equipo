@@ -10,8 +10,58 @@
   </div>
 </div>
 
+<div class="filtros" role="group" aria-label="Filtrar el historial">
+  <label>
+    Severidad
+    <select
+      [value]="severidad()"
+      (change)="cambiarFiltro(fijarSeveridad($any($event.target).value))"
+    >
+      <option value="">Todas</option>
+      <option value="critica">Crítica</option>
+      <option value="advertencia">Advertencia</option>
+    </select>
+  </label>
+  <label>
+    Variable
+    <select [value]="variable()" (change)="cambiarFiltro(fijarVariable($any($event.target).value))">
+      <option value="">Todas</option>
+      @for (v of variables; track v.clave) {
+        <option [value]="v.clave">{{ v.nombre }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    Desde
+    <input
+      type="date"
+      [value]="desde()"
+      [max]="hoy"
+      (change)="cambiarFiltro(fijarDesde($any($event.target).value))"
+    />
+  </label>
+  <label>
+    Hasta
+    <input
+      type="date"
+      [value]="hasta()"
+      [max]="hoy"
+      (change)="cambiarFiltro(fijarHasta($any($event.target).value))"
+    />
+  </label>
+  @if (hayFiltros()) {
+    <button type="button" class="limpiar" (click)="limpiar()">Quitar filtros</button>
+  }
+</div>
+
 @if (error(); as e) {
   <p class="aviso" role="alert">{{ e }}</p>
+}
+@if (rangoInvertido()) {
+  <p class="aviso" role="alert">La fecha "Desde" debe ser anterior o igual a "Hasta".</p>
+}
+@if (recortada()) {
+  <p class="nota" role="status">Hay más alertas: se muestran las 500 más recientes.</p>
 }
 
 <ul class="alertas">
@@ -52,6 +102,12 @@
       </footer>
     </li>
   } @empty {
-    <li class="vacio">{{ soloActivas() ? 'No hay alertas activas.' : 'No hay alertas.' }}</li>
+    <li class="vacio">
+      @if (hayFiltros()) {
+        No hay alertas con esos filtros.
+      } @else {
+        {{ soloActivas() ? 'No hay alertas activas.' : 'No hay alertas.' }}
+      }
+    </li>
   }
 </ul>

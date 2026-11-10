@@ -29,6 +29,44 @@
   }
 }
 
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+
+  label {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.8rem;
+    color: #444;
+  }
+
+  select,
+  input {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #fff;
+    font: inherit;
+  }
+
+  .limpiar {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 0.35rem 0.6rem;
+    font: inherit;
+    cursor: pointer;
+  }
+}
+
+.nota {
+  color: #555;
+  font-size: 0.85rem;
+}
+
 .aviso {
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
