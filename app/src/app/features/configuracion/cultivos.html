@@ -1,0 +1,99 @@
+<div class="lista">
+  @for (c of cultivos(); track c.id) {
+    <button
+      type="button"
+      class="gs-boton secundario"
+      [class.elegido]="elegido() === c.id"
+      (click)="editar(c)"
+    >
+      {{ c.nombre }}
+    </button>
+  }
+  <button
+    type="button"
+    class="gs-boton secundario"
+    [class.elegido]="elegido() === null"
+    (click)="nuevo()"
+  >
+    + Nuevo cultivo
+  </button>
+</div>
+
+<form [formGroup]="formulario" (ngSubmit)="guardar()">
+  <div class="gs-form">
+    <label>
+      Identificador
+      <input formControlName="id" placeholder="tomate-cherry" />
+    </label>
+    <label>
+      Nombre
+      <input formControlName="nombre" />
+    </label>
+  </div>
+
+  <h3>Rangos adecuados</h3>
+  <p class="gs-nota">
+    Dentro del margen de un límite se abre una advertencia. Fuera del rango pasa a crítica cuando
+    lleva el tiempo indicado, y solo entonces se manda la notificación.
+  </p>
+  <div class="gs-desplazable">
+    <table class="gs-tabla" formArrayName="umbrales">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Mínimo</th>
+          <th>Máximo</th>
+          <th>Margen</th>
+          <th>Crítica por bajo tras (min)</th>
+          <th>Crítica por alto tras (min)</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (umbral of umbrales; track $index) {
+          <tr [formGroupName]="$index" [class.inactivo]="!umbral.value.activo">
+            <td>
+              <label class="variable">
+                <input type="checkbox" formControlName="activo" />
+                {{ variables[$index].nombre }} ({{ variables[$index].unidad }})
+              </label>
+            </td>
+            <td><input type="number" formControlName="minimo" step="0.5" /></td>
+            <td><input type="number" formControlName="maximo" step="0.5" /></td>
+            <td><input type="number" formControlName="margen" step="0.5" min="0" /></td>
+            <td><input type="number" formControlName="tiempo_bajo_min" min="0" /></td>
+            <td><input type="number" formControlName="tiempo_alto_min" min="0" /></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Riesgo de hongos</h3>
+  <div class="gs-form" formGroupName="hongos">
+    <label>
+      Humedad del aire desde (%)
+      <input type="number" formControlName="humedad_minima" min="0" max="100" />
+    </label>
+    <label>
+      Temperatura desde (°C)
+      <input type="number" formControlName="temperatura_minima" />
+    </label>
+    <label>
+      Durante (min)
+      <input type="number" formControlName="tiempo_minimo_min" min="0" />
+    </label>
+  </div>
+
+  @if (mensaje(); as m) {
+    <p class="gs-aviso" [class.exito]="m.exito" role="status">{{ m.texto }}</p>
+  }
+
+  <div class="acciones">
+    <button class="gs-boton" type="submit" [disabled]="formulario.invalid">
+      {{ elegido() === null ? 'Crear cultivo' : 'Guardar cambios' }}
+    </button>
+    @if (elegido() !== null && !esPredeterminado()) {
+      <button class="gs-boton peligro" type="button" (click)="borrar()">Borrar</button>
+    }
+  </div>
+</form>

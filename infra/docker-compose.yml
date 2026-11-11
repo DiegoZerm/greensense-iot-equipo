@@ -1,0 +1,73 @@
+# Entorno local de GreenSense IoT.
+# Antes del primer arranque: cp .env.example .env && ./mosquitto/crear_usuarios.sh
+# Antes de exponerlo con el túnel: ./revisar_secretos.sh
+name: greensense
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "${MQTT_PUERTO:-1883}:1883"
+    volumes:
+      - ./mosquitto:/mosquitto/config:ro
+      - mosquitto-datos:/mosquitto/data
+    restart: unless-stopped
+
+  db:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      POSTGRES_DB: ${DB_NOMBRE:-greensense}
+      POSTGRES_USER: ${DB_USUARIO:-greensense}
+      POSTGRES_PASSWORD: ${DB_CONTRASENA:?Falta DB_CONTRASENA en infra/.env}
+    ports:
+      - "${DB_PUERTO:-5432}:5432"
+    volumes:
+      - db-datos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # Lo siguiente solo arranca con: docker compose --profile app up -d --build
+  # Sin ese perfil se levantan solo el broker y la base, para desarrollar en local.
+  servidor:
+    profiles: [app]
+    build: ../servidor
+    env_file: .env
+    environment:
+      DB_HOST: db
+      DB_PUERTO: 5432
+      MQTT_HOST: mosquitto
+      MQTT_PUERTO: 1883
+    depends_on:
+      db:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+    restart: unless-stopped
+
+  app:
+    profiles: [app]
+    build: ../app
+    ports:
+      - "${APP_PUERTO:-8080}:80"
+    depends_on:
+      - servidor
+    restart: unless-stopped
+
+  # HTTPS sin abrir puertos del router, para que el push funcione en el teléfono.
+  # Arranca con: docker compose --profile app --profile tunel up -d --build
+  # La dirección pública temporal sale en: docker compose --profile app --profile tunel logs tunel
+  tunel:
+    profiles: [tunel]
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://app:80
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  mosquitto-datos:
+  db-datos:

@@ -1,0 +1,83 @@
+.barra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--gs-verde);
+  color: #fff;
+
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    flex: 1;
+  }
+
+  a {
+    color: #e8f5e9;
+    text-decoration: none;
+    // El contador de alertas no debe quedar en otra línea que su enlace.
+    white-space: nowrap;
+
+    &.activo {
+      color: #fff;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+  }
+}
+
+.contador {
+  display: inline-block;
+  min-width: 1.2rem;
+  margin-left: 0.2rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  background: var(--gs-critico);
+  color: #fff;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+main {
+  padding: 1rem;
+}
+
+.usuario {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+
+  .nombre {
+    color: #fff;
+    text-decoration: none;
+
+    small {
+      opacity: 0.8;
+    }
+  }
+
+  button {
+    border: 1px solid #fff;
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+}
+
+// En un teléfono la navegación va en su propia línea, debajo del nombre.
+@media (max-width: 600px) {
+  .barra nav {
+    flex-basis: 100%;
+    order: 2;
+  }
+}

@@ -1,0 +1,130 @@
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: flex-end;
+  margin-bottom: 0.75rem;
+
+  label {
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.8rem;
+    color: #444;
+  }
+
+  select,
+  input {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    background: #fff;
+    font: inherit;
+  }
+}
+
+.vistas button {
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 0.35rem 0.8rem;
+  font: inherit;
+  cursor: pointer;
+
+  &:first-child {
+    border-radius: 999px 0 0 999px;
+  }
+
+  &:last-child {
+    border-radius: 0 999px 999px 0;
+  }
+
+  &.elegido {
+    background: var(--gs-verde);
+    border-color: var(--gs-verde);
+    color: #fff;
+  }
+}
+
+.fechas {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+
+  .flecha,
+  .hoy {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 0.3rem 0.6rem;
+    font: inherit;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+  }
+}
+
+.exportar {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+h2 {
+  margin: 0.25rem 0 0.75rem;
+  font-size: 1.15rem;
+
+  &::first-letter {
+    text-transform: uppercase;
+  }
+
+  .cargando {
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 400;
+  }
+}
+
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.cifra {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+
+  .etiqueta {
+    color: #52514e;
+    font-size: 0.8rem;
+  }
+
+  .valor {
+    color: #0b0b0b;
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  .sin-datos {
+    color: #898781;
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .detalle {
+    color: #898781;
+    font-size: 0.75rem;
+  }
+}
+
+.graficas {
+  display: grid;
+  gap: 0.75rem;
+}

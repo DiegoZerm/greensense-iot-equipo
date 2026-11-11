@@ -1,0 +1,160 @@
+<div class="filtros" role="group" aria-label="Filtros del historial">
+  <label>
+    Nodo
+    <select (change)="cambiar({ nodo: $any($event.target).value })" aria-label="Nodo">
+      @for (n of nodos(); track n.id) {
+        <option [value]="n.id" [selected]="n.id === nodo()?.id">
+          {{ n.nombre }}{{ n.activo ? '' : ' (de baja)' }}
+        </option>
+      }
+    </select>
+  </label>
+
+  <div class="vistas" role="group" aria-label="Periodo">
+    @for (v of vistas; track v.clave) {
+      <button
+        type="button"
+        [class.elegido]="vista() === v.clave"
+        (click)="cambiar({ vista: v.clave })"
+      >
+        {{ v.nombre }}
+      </button>
+    }
+  </div>
+
+  <label>
+    Variable
+    <select (change)="cambiar({ variable: $any($event.target).value })" aria-label="Variable">
+      <option value="" [selected]="!variable()">Todas</option>
+      @for (v of variables; track v.clave) {
+        <option [value]="v.clave" [selected]="v.clave === variable()">{{ v.nombre }}</option>
+      }
+    </select>
+  </label>
+
+  @if (vista() === 'rango') {
+    <div class="fechas rango">
+      <label>
+        Desde
+        <input
+          type="date"
+          [value]="desde()"
+          [max]="fecha()"
+          (change)="$any($event.target).value && cambiar({ desde: $any($event.target).value })"
+        />
+      </label>
+      <label>
+        Hasta
+        <input
+          type="date"
+          [value]="fecha()"
+          [max]="hoy"
+          (change)="$any($event.target).value && cambiar({ fecha: $any($event.target).value })"
+        />
+      </label>
+    </div>
+  } @else {
+    <div class="fechas">
+      <button type="button" class="flecha" (click)="mover(-1)" aria-label="Periodo anterior">
+        ‹
+      </button>
+      <input
+        type="date"
+        [value]="fecha()"
+        [max]="hoy"
+        (change)="$any($event.target).value && cambiar({ fecha: $any($event.target).value })"
+        aria-label="Último día del periodo"
+      />
+      <button
+        type="button"
+        class="flecha"
+        (click)="mover(1)"
+        [disabled]="fecha() >= hoy"
+        aria-label="Periodo siguiente"
+      >
+        ›
+      </button>
+      @if (fecha() !== hoy) {
+        <button type="button" class="hoy" (click)="cambiar({ fecha: hoy })">Hoy</button>
+      }
+    </div>
+  }
+
+  @if (puedeExportar()) {
+    <div class="exportar">
+      <button type="button" class="gs-boton secundario" (click)="exportar('lecturas')">
+        Lecturas CSV
+      </button>
+      <button type="button" class="gs-boton secundario" (click)="exportar('alertas')">
+        Alertas CSV
+      </button>
+    </div>
+  }
+</div>
+
+<h2>
+  {{ titulo() }}
+  @if (cargando()) {
+    <small class="cargando">Actualizando…</small>
+  }
+</h2>
+
+@if (error(); as e) {
+  <p class="gs-aviso" role="alert">{{ e }}</p>
+}
+@if (aviso(); as a) {
+  <p class="gs-aviso" role="alert">{{ a }}</p>
+}
+
+@if (datos(); as d) {
+  @if (d.recortada) {
+    <p class="gs-aviso" role="status">
+      El periodo tiene demasiadas lecturas; se muestran las primeras.
+    </p>
+  }
+
+  <section class="resumen" aria-label="Resumen del periodo">
+    @for (v of visibles(); track v.clave) {
+      <div class="cifra">
+        <span class="etiqueta">{{ v.nombre }}</span>
+        @if (d.resumen.variables[v.clave]; as e) {
+          <span class="valor">{{ numero(e.promedio, v.unidad) }}</span>
+          <span class="detalle"
+            >promedio · mín {{ numero(e.minimo, v.unidad) }} · máx
+            {{ numero(e.maximo, v.unidad) }}</span
+          >
+        } @else {
+          <span class="valor sin-datos">Sin datos</span>
+        }
+      </div>
+    }
+    <div class="cifra">
+      <span class="etiqueta">Lecturas recibidas</span>
+      <span class="valor">{{ d.resumen.lecturas.toLocaleString('es-MX') }}</span>
+      <span class="detalle">
+        de {{ d.resumen.esperadas.toLocaleString('es-MX') }} esperadas
+        @if (d.resumen.porcentaje_perdidas !== null) {
+          · {{ d.resumen.porcentaje_perdidas.toLocaleString('es-MX') }} % perdidas
+        }
+      </span>
+    </div>
+  </section>
+
+  @if (limites(); as l) {
+    <div class="graficas">
+      @for (v of visibles(); track v.clave) {
+        <gs-grafica-serie
+          [titulo]="v.nombre"
+          [unidad]="v.unidad"
+          [puntos]="d.puntos[v.clave]"
+          [desde]="l.desde"
+          [hasta]="l.hasta"
+          [pasoMs]="d.pasoMs"
+          [rango]="referencias()[v.clave] ?? null"
+        />
+      }
+    </div>
+  }
+} @else if (!error() && !nodos().length) {
+  <p class="gs-nota">No hay nodos registrados.</p>
+}

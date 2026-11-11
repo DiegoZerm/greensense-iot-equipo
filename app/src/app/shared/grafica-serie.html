@@ -1,0 +1,134 @@
+<figure class="grafica">
+  <figcaption>
+    <span class="titulo">{{ titulo() }}</span>
+    <span class="unidad">{{ unidad() }}</span>
+    @if (rango(); as r) {
+      <span class="referencia">
+        <span class="muestra-franja" aria-hidden="true"></span>
+        Rango adecuado {{ r.minimo }} a {{ r.maximo }} {{ unidad() }}
+      </span>
+    }
+    @if (agregados()) {
+      <span class="referencia">
+        <span class="muestra-banda" aria-hidden="true"></span>
+        Promedio con mínimo y máximo
+      </span>
+    }
+  </figcaption>
+
+  <div class="lienzo" #lienzo>
+    <svg
+      [attr.viewBox]="'0 0 ' + ancho() + ' ' + alto()"
+      role="img"
+      [attr.aria-label]="titulo() + ' en ' + unidad() + '. Los valores están en la tabla.'"
+      (pointermove)="mover($event)"
+      (pointerleave)="salir()"
+    >
+      <!-- Rejilla y ejes: grises, de 1 px, detrás de todo -->
+      @for (v of escalaY().ticks; track v) {
+        <line
+          class="rejilla"
+          [attr.x1]="m.izquierda"
+          [attr.x2]="ancho() - m.derecha"
+          [attr.y1]="y(v)"
+          [attr.y2]="y(v)"
+        />
+        <text class="eje" [attr.x]="m.izquierda - 6" [attr.y]="y(v) + 4" text-anchor="end">
+          {{ v.toLocaleString('es-MX') }}
+        </text>
+      }
+      @for (tick of ticksX(); track tick.x) {
+        <text class="eje" [attr.x]="tick.x" [attr.y]="alto() - 8" text-anchor="middle">
+          {{ tick.texto }}
+        </text>
+      }
+
+      @if (franja(); as franja) {
+        <rect
+          class="franja"
+          [attr.x]="m.izquierda"
+          [attr.width]="plotAncho()"
+          [attr.y]="franja.y"
+          [attr.height]="franja.alto"
+        />
+      }
+
+      @if (conDatos()) {
+        <path class="banda" [attr.d]="banda()" />
+        <path class="linea" [attr.d]="linea()" />
+        @for (s of sueltos(); track $index) {
+          <circle class="marcador" [attr.cx]="s.cx" [attr.cy]="s.cy" r="4" />
+        }
+      } @else {
+        <text
+          class="vacio"
+          [attr.x]="m.izquierda + plotAncho() / 2"
+          [attr.y]="m.arriba + plotAlto() / 2"
+          text-anchor="middle"
+        >
+          Sin lecturas en este periodo
+        </text>
+      }
+
+      @if (punto(); as p) {
+        <line
+          class="cursor"
+          [attr.x1]="p.cx"
+          [attr.x2]="p.cx"
+          [attr.y1]="m.arriba"
+          [attr.y2]="m.arriba + plotAlto()"
+        />
+        <circle class="marcador activo" [attr.cx]="p.cx" [attr.cy]="p.cy" r="5" />
+      }
+    </svg>
+
+    @if (punto(); as p) {
+      <div class="globo" [class.izquierda]="p.alLado" [style.left.%]="p.izquierda" role="status">
+        <strong>{{ p.valor }}</strong>
+        @if (p.extremos) {
+          <span>{{ p.extremos }}</span>
+        }
+        <span class="cuando">{{ p.cuando }}</span>
+      </div>
+    }
+  </div>
+
+  @if (conDatos()) {
+    <button
+      type="button"
+      class="ver-tabla"
+      (click)="verTabla.set(!verTabla())"
+      [attr.aria-expanded]="verTabla()"
+    >
+      {{ verTabla() ? 'Ocultar tabla' : 'Ver tabla' }}
+    </button>
+  }
+  @if (verTabla()) {
+    <div class="tabla">
+      <table class="gs-tabla">
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>{{ agregados() ? 'Promedio' : 'Valor' }}</th>
+            @if (agregados()) {
+              <th>Mínimo</th>
+              <th>Máximo</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of filasTabla(); track $index) {
+            <tr>
+              <td>{{ fila.cuando }}</td>
+              <td>{{ fila.valor }}</td>
+              @if (agregados()) {
+                <td>{{ fila.minimo }}</td>
+                <td>{{ fila.maximo }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</figure>

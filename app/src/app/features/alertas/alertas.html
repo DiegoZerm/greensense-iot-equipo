@@ -1,0 +1,113 @@
+<div class="encabezado">
+  <h2>Alertas</h2>
+  <div class="filtro" role="group" aria-label="Filtro">
+    <button type="button" [class.elegido]="soloActivas()" (click)="soloActivas.set(true)">
+      Activas
+    </button>
+    <button type="button" [class.elegido]="!soloActivas()" (click)="soloActivas.set(false)">
+      Todas
+    </button>
+  </div>
+</div>
+
+<div class="filtros" role="group" aria-label="Filtrar el historial">
+  <label>
+    Severidad
+    <select
+      [value]="severidad()"
+      (change)="cambiarFiltro(fijarSeveridad($any($event.target).value))"
+    >
+      <option value="">Todas</option>
+      <option value="critica">Crítica</option>
+      <option value="advertencia">Advertencia</option>
+    </select>
+  </label>
+  <label>
+    Variable
+    <select [value]="variable()" (change)="cambiarFiltro(fijarVariable($any($event.target).value))">
+      <option value="">Todas</option>
+      @for (v of variables; track v.clave) {
+        <option [value]="v.clave">{{ v.nombre }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    Desde
+    <input
+      type="date"
+      [value]="desde()"
+      [max]="hoy"
+      (change)="cambiarFiltro(fijarDesde($any($event.target).value))"
+    />
+  </label>
+  <label>
+    Hasta
+    <input
+      type="date"
+      [value]="hasta()"
+      [max]="hoy"
+      (change)="cambiarFiltro(fijarHasta($any($event.target).value))"
+    />
+  </label>
+  @if (hayFiltros()) {
+    <button type="button" class="limpiar" (click)="limpiar()">Quitar filtros</button>
+  }
+</div>
+
+@if (error(); as e) {
+  <p class="aviso" role="alert">{{ e }}</p>
+}
+@if (rangoInvertido()) {
+  <p class="aviso" role="alert">La fecha "Desde" debe ser anterior o igual a "Hasta".</p>
+}
+@if (recortada()) {
+  <p class="nota" role="status">Hay más alertas: se muestran las 500 más recientes.</p>
+}
+
+<ul class="alertas">
+  @for (alerta of visibles(); track alerta.id) {
+    <li
+      class="alerta"
+      [class]="alerta.severidad"
+      [class.resuelta]="!alerta.activa"
+      [attr.data-alerta]="alerta.id"
+    >
+      <header>
+        <span class="severidad">{{
+          alerta.severidad === 'critica' ? 'Crítica' : 'Advertencia'
+        }}</span>
+        <span class="tipo">{{ tipo(alerta) }} · {{ nodo(alerta) }}</span>
+      </header>
+      <p class="mensaje">{{ alerta.mensaje }}</p>
+      <p class="recomendacion">{{ alerta.recomendacion }}</p>
+      <footer>
+        @if (alerta.tipo === 'desconexion' && alerta.fuera_desde) {
+          <span>Última lectura {{ alerta.fuera_desde | date: 'dd/MM HH:mm' }}</span>
+        } @else {
+          <span>Desde {{ alerta.iniciada_en | date: 'dd/MM HH:mm' }}</span>
+        }
+        @if (alerta.resuelta_en) {
+          <span>· Resuelta {{ alerta.resuelta_en | date: 'dd/MM HH:mm' }}</span>
+        }
+        @if (alerta.atendida_en) {
+          <span class="atendida"
+            >· Atendida {{ alerta.atendida_en | date: 'dd/MM HH:mm' }}
+            @if (alerta.atendida_por_nombre) {
+              por {{ alerta.atendida_por_nombre }}
+            }
+          </span>
+        } @else if (alerta.activa && puedeAtender()) {
+          <button type="button" (click)="atender(alerta)">Marcar como atendida</button>
+        }
+      </footer>
+    </li>
+  } @empty {
+    <li class="vacio">
+      @if (hayFiltros()) {
+        No hay alertas con esos filtros.
+      } @else {
+        {{ soloActivas() ? 'No hay alertas activas.' : 'No hay alertas.' }}
+      }
+    </li>
+  }
+</ul>

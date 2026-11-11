@@ -1,0 +1,12 @@
+# Solo se abre en esta computadora: el tablero entra al servidor con tu cuenta.
+[server]
+address = "127.0.0.1"
+port = 8502
+headless = true
+
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+
+[client]
+toolbarMode = "viewer"
