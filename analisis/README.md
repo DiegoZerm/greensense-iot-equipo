@@ -42,7 +42,7 @@ En la barra lateral van el correo y la contraseña de la app, el nodo y la hora 
    .venv/bin/jupyter lab notebooks
    ```
 
-Se usa el CSV más reciente de la carpeta; para elegir otro, define `GS_CSV=/ruta/al/archivo.csv`. En Jupyter, usa **Run > Run All Cells**. Los notebooks se suben sin resultados: se generan al correrlos con los datos de la prueba.
+Se usa el CSV más reciente de la carpeta; para elegir otro, define `GS_CSV=/ruta/al/archivo.csv`. Los datos de la prueba de campo de 72 horas están en [`prueba-72h/`](prueba-72h/README.md), con la forma de reproducir los resultados. En Jupyter, usa **Run > Run All Cells**. Los notebooks se suben sin resultados: se generan al correrlos con los datos de la prueba.
 
 **Los datos de `gs-demo` sirven para probar que todo corre, pero no son evidencia.** Los resultados que se entreguen deben salir del nodo real. Los notebooks muestran el archivo que usaron y avisan si el periodo es menor a 7 días.
 
